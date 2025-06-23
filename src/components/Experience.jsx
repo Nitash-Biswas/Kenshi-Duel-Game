@@ -11,10 +11,17 @@ import CharacterController from "./CharacterController";
 import Plane from "./Plane";
 import {  InstancedGrass } from "./Grass";
 import { Fog } from "three";
+import { insertCoin } from "playroomkit";
 
 
 export const Experience = () => {
+  const start = async () => {
+    await insertCoin();
+  }
 
+  useEffect(() => {
+    start();
+  })
   const shadowCameraRef = useRef();
   return (
     <>

@@ -16,7 +16,7 @@
     "@react-three/rapier": "^1.1.1",
     "@types/three": "^0.177.0",
     "leva": "^0.9.35",
-    "playroomkit": "^0.0.87",
+    "playroomkit": "^0.0.36",
     "r3f-perf": "^7.2.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",

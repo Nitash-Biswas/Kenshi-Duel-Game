@@ -11,17 +11,38 @@ import CharacterController from "./CharacterController";
 import Plane from "./Plane";
 import {  InstancedGrass } from "./Grass";
 import { Fog } from "three";
-import { insertCoin } from "playroomkit";
+import { insertCoin, Joystick, onPlayerJoin } from "playroomkit";
 
 
 export const Experience = () => {
+  const [players, setPlayers] = useState([]);
   const start = async () => {
+    // Start the game
     await insertCoin();
-  }
+
+    // Create a joystick controller for each joining player
+    onPlayerJoin((state) => {
+      // Joystick will only create UI for current player (myPlayer)
+      // For others, it will only sync their state
+      const joystick = new Joystick(state, {
+        type: "angular",
+        buttons: [{ id: "fire", label: "Fire" }],
+      });
+      const newPlayer = { state, joystick };
+      state.setState("health", 100);
+      state.setState("deaths", 0);
+      state.setState("kills", 0);
+      setPlayers((players) => [...players, newPlayer]);
+      state.onQuit(() => {
+        setPlayers((players) => players.filter((p) => p.state.id !== state.id));
+      });
+    });
+  };
 
   useEffect(() => {
     start();
-  })
+  }, []);
+
   const shadowCameraRef = useRef();
   return (
     <>

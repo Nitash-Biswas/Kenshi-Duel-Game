@@ -4,7 +4,7 @@ import { CapsuleCollider, RigidBody } from "@react-three/rapier";
 import { useFrame } from "@react-three/fiber";
 import { useKeyboardControls } from "@react-three/drei";
 import { Vector3 } from "three";
-import { useControls } from "leva";
+// import { useControls } from "leva";
 
 const CharacterController = () => {
   const rb = useRef();
@@ -23,7 +23,7 @@ const CharacterController = () => {
   const WALK_SPEED = 2;
   const RUN_SPEED = 6;
 
-  const { isOrbit } = useControls({ isOrbit: false });
+  // const { isOrbit } = useControls({ isOrbit: false });
 
   const lerpAngle = (a, b, t) => {
     const delta =
@@ -68,16 +68,16 @@ const CharacterController = () => {
   });
 
   return (
-    <RigidBody colliders={false} lockRotations ref={rb} position={[0, 0, -14]}>
+    <RigidBody colliders={false} lockRotations ref={rb} position={[0, 0, 0]}>
       <group>
         {/* Camera follow points */}
-        {!isOrbit && (
+        {/* {!isOrbit && (
           <>
             {" "}
             <group ref={cameraTarget} position={[0, 1.2, 0]} />
             <group ref={cameraPivot} position={[0, 3.0, -4]} />
           </>
-        )}
+        )} */}
 
         {/* Character */}
         <group ref={characterRef}>

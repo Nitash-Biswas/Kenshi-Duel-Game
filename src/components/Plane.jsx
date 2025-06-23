@@ -11,7 +11,7 @@ const Plane = () => {
         receiveShadow
       >
         <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="f0dfdfd" />
+        <meshStandardMaterial color="#fdfdfd" />
       </mesh>
     </RigidBody>
   );

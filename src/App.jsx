@@ -6,7 +6,7 @@ import {
   OrbitControls,
 } from "@react-three/drei";
 import { Experience } from "./components/Experience";
-import { Perf } from "r3f-perf";
+//import { Perf } from "r3f-perf";
 
 // Define keyboard control mappings
 const keyboardMap = [

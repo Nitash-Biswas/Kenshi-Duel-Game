@@ -5,16 +5,17 @@ import {
   Sky,
 
 } from "@react-three/drei";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Physics } from "@react-three/rapier";
 import CharacterController from "./CharacterController";
 import Plane from "./Plane";
 import {  InstancedGrass } from "./Grass";
 import { Fog } from "three";
 
-export const Experience = () => {
-  const shadowCameraRef = useRef();
 
+export const Experience = () => {
+
+  const shadowCameraRef = useRef();
   return (
     <>
       <Environment preset="sunset" />
@@ -50,14 +51,15 @@ export const Experience = () => {
 
         <CharacterController />
 
-        <fogExp2 attach="fog" color="#cad4db" density={0.1} />
+
 
       </Physics>
+      {/* <fogExp2 attach="fog" color="#cad4db" density={0.1} />
       <mesh>
         <boxGeometry args={[100, 100, 100]} />
         <meshStandardMaterial color="#78623b" side={2}/>
       </mesh>
-      <InstancedGrass/>
+      <InstancedGrass/> */}
 
     </>
   );

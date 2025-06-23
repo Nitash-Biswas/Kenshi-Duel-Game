@@ -9,10 +9,12 @@ import { useGLTF, useAnimations } from '@react-three/drei'
 import { SkeletonUtils } from 'three-stdlib'
 import * as THREE from 'three'
 
-const Character = ({animation, ...props}) => {
+const Character = ({animation, color = "blue", ...props}) => {
   const group = React.useRef()
   const { scene, animations } = useGLTF('./models/character.glb')
+  // Skinned meshes need to be cloned
   const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene])
+  // useGraph creates two flat objects: nodes and materials
   const { nodes, materials } = useGraph(clone)
   const { actions, names } = useAnimations(animations, group)
 
@@ -33,7 +35,10 @@ const Character = ({animation, ...props}) => {
           {/* <skinnedMesh castShadow name="Alpha_Joints" geometry={nodes.Alpha_Joints.geometry} material={normalMaterial} skeleton={nodes.Alpha_Joints.skeleton} />
           <skinnedMesh castShadow name="Alpha_Surface" geometry={nodes.Alpha_Surface.geometry} material={normalMaterial} skeleton={nodes.Alpha_Surface.skeleton} /> */}
           <skinnedMesh castShadow name="Alpha_Joints" geometry={nodes.Alpha_Joints.geometry} material={materials.Alpha_Joints_MAT} skeleton={nodes.Alpha_Joints.skeleton} />
-          <skinnedMesh castShadow name="Alpha_Surface" geometry={nodes.Alpha_Surface.geometry} material={materials.Alpha_Body_MAT} skeleton={nodes.Alpha_Surface.skeleton} />
+
+          <skinnedMesh castShadow name="Alpha_Surface" geometry={nodes.Alpha_Surface.geometry} material={materials.Alpha_Body_MAT} skeleton={nodes.Alpha_Surface.skeleton} >
+            <meshStandardMaterial color={color} />
+          </skinnedMesh>
         </group>
       </group>
     </group>

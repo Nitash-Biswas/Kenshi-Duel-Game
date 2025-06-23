@@ -81,7 +81,7 @@ const CharacterController = () => {
 
         {/* Character */}
         <group ref={characterRef}>
-          <Character scale={1} position-y={-0.25} animation={animation} />
+          <Character scale={1} position-y={-0.25} animation={animation} color="red"/>
         </group>
       </group>
       <CapsuleCollider args={[0.54, 0.2]} position={[0, 0.5, 0]} />

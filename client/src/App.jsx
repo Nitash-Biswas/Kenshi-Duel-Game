@@ -26,7 +26,7 @@ function App() {
           <GizmoViewport />
         </GizmoHelper>
         {/* <axesHelper args={[5]} /> */}
-        <Perf position="top-left" />
+        {/* <Perf position="top-left" /> */}
         <OrbitControls/>
         {/* <mesh position={[2,2,2]}>
           <planeGeometry />

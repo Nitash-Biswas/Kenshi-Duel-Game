@@ -1,18 +1,14 @@
 "use client";
-import {
-  Environment,
-  OrthographicCamera,
-  Sky,
-
-} from "@react-three/drei";
+import { Environment, OrthographicCamera, Sky } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import { Physics } from "@react-three/rapier";
 import CharacterController from "./CharacterController";
 import Plane from "./Plane";
-import {  InstancedGrass } from "./Grass";
+import { InstancedGrass } from "./Grass";
 import { Fog } from "three";
-import { insertCoin, Joystick, onPlayerJoin } from "playroomkit";
-
+import { insertCoin, Joystick, myPlayer, onPlayerJoin } from "playroomkit";
+import Character from "./Character";
+import { Controller } from "./Controller";
 
 export const Experience = () => {
   const [players, setPlayers] = useState([]);
@@ -62,25 +58,27 @@ export const Experience = () => {
         shadow-mapSize-height={2048}
         shadow-bias={-0.00005}
       >
-        <OrthographicCamera
-          left={-22}
-          right={15}
-          top={10}
-          bottom={-20}
-          ref={shadowCameraRef}
-          attach={"shadow-camera"}
-        />
+
       </directionalLight>
 
-      <Physics debug >
-
+      <Physics>
         {/* Ground Plane */}
-        <Plane/>
+        <Plane />
 
-        <CharacterController />
-
-
-
+        {/* <CharacterController /> */}
+        {/* <Character scale={1} position-y={0} animation="Idle" color="red"/> */}
+        {console.log(players)}
+        {players.map(({ state, joystick }, idx) => {
+          return (
+            <Controller
+              key={state.id}
+              position-x={idx * 2}
+              state={state}
+              joystick={joystick}
+              userPlayer={state.id === myPlayer()?.id}
+            />
+          );
+        })}
       </Physics>
       {/* <fogExp2 attach="fog" color="#cad4db" density={0.1} />
       <mesh>
@@ -88,7 +86,6 @@ export const Experience = () => {
         <meshStandardMaterial color="#78623b" side={2}/>
       </mesh>
       <InstancedGrass/> */}
-
     </>
   );
 };

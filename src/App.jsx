@@ -20,14 +20,14 @@ const keyboardMap = [
 function App() {
   return (
     <KeyboardControls map={keyboardMap}>
-      <Canvas shadows camera={{ position: [5, 1.5, 0], fov: 60 }}>
+      <Canvas shadows >
         {/* Debug Gizmo and Axes */}
         <GizmoHelper alignment="bottom-right" margin={[100, 100]}>
           <GizmoViewport />
         </GizmoHelper>
         {/* <axesHelper args={[5]} /> */}
         {/* <Perf position="top-left" /> */}
-        <OrbitControls/>
+        {/* <OrbitControls/> */}
         {/* <mesh position={[2,2,2]}>
           <planeGeometry />
           <meshNormalMaterial side={2} />

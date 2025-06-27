@@ -10,6 +10,8 @@ import { insertCoin, Joystick, myPlayer, onPlayerJoin } from "playroomkit";
 import Character from "./Character";
 import { Controller } from "./Controller";
 
+
+
 export const Experience = () => {
   const [players, setPlayers] = useState([]);
   const start = async () => {
@@ -22,7 +24,7 @@ export const Experience = () => {
       // For others, it will only sync their state
       const joystick = new Joystick(state, {
         type: "angular",
-        buttons: [{ id: "fire", label: "Fire" }],
+        buttons: [{ id: "attack", label: "Attack" }],
       });
       const newPlayer = { state, joystick };
       state.setState("health", 100);
@@ -38,8 +40,9 @@ export const Experience = () => {
   useEffect(() => {
     start();
   }, []);
-
+  const lightRef = useRef();
   const shadowCameraRef = useRef();
+
   return (
     <>
       <Environment preset="sunset" />
@@ -50,6 +53,7 @@ export const Experience = () => {
         azimuth={0.25}
       />
 
+      {/* <directionalLightHelper/> */}
       <directionalLight
         intensity={0.65}
         castShadow
@@ -57,11 +61,13 @@ export const Experience = () => {
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-bias={-0.00005}
-      >
+        shadow-camera-left={-20}
+        shadow-camera-right={20}
+        shadow-camera-top={20}
+        shadow-camera-bottom={-20}
+      ></directionalLight>
 
-      </directionalLight>
-
-      <Physics>
+      <Physics debug>
         {/* Ground Plane */}
         <Plane />
 
@@ -86,6 +92,7 @@ export const Experience = () => {
         <meshStandardMaterial color="#78623b" side={2}/>
       </mesh>
       <InstancedGrass/> */}
+
     </>
   );
 };

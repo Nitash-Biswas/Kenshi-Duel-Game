@@ -1,121 +1,236 @@
-import {
-  CapsuleCollider,
-  CuboidCollider,
-  RigidBody,
-  vec3,
-} from "@react-three/rapier";
-import { useRef, useState } from "react";
+import { CapsuleCollider, RigidBody, vec3 } from "@react-three/rapier";
+import { useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import Knight from "./Knight";
-import { Billboard, CameraControls, Text } from "@react-three/drei";
+import { Billboard, CameraControls, Text, useKeyboardControls } from "@react-three/drei";
 import * as THREE from "three";
 import { isHost } from "playroomkit";
 
-export const Controller = ({ state, joystick, userPlayer, ...props }) => {
+export const Controller = ({
+  state,
+  joystick,
+  userPlayer,
+  onKilled,
+  ...props
+}) => {
   const groupRef = useRef();
   const characterRef = useRef();
   const rBodyRef = useRef();
   const cameraRef = useRef();
   const knightRef = useRef();
-  const swordBodyRef = useRef(); // <— New RigidBody to move the collider
+  const swordBodyRef = useRef();
+  const lastHitTimeRef = useRef({});
+  const isSlashingRef = useRef(false);
 
+  const [health, setHealth] = useState(state.state.health);
   const [animation, setAnimation] = useState("Idle");
-  const cameraDistanceY = window.innerWidth < 1024 ? 2.6 : 2.8; //16 for mobile, 20 for desktop
-  const cameraDistanceZ = window.innerWidth < 1024 ? 2.2 : 3.6; //16 for mobile, 20 for desktop
 
-  useFrame(() => {
-    if (cameraRef.current && rBodyRef.current) {
-      const pos = vec3(rBodyRef.current.translation());
-      cameraRef.current.setLookAt(
-        //camera pos
-        pos.x,
-        pos.y + cameraDistanceY,
-        pos.z + cameraDistanceZ,
-        //target to look at
-        pos.x + 1.0,
-        pos.y + 1.5,
-        pos.z
-      );
+  const cameraDistanceY = window.innerWidth < 1024 ? 5.0 : 3.2;
+  const cameraDistanceZ = window.innerWidth < 1024 ? 2.6 : 3.0;
+
+  ////////////////     AUDIO EFFECTS      ////////////////////////////////////////////////////
+
+  useEffect(() => {
+    if (state.state.dead) {
+      const audio = new Audio("/audios/dead.mp3");
+      audio.volume = 0.5;
+      audio.play();
     }
+  }, [state.state.dead]);
 
-    if (rBodyRef.current && characterRef.current) {
-      const angle = joystick.angle();
-      const vel = { x: 0, y: 0, z: 0 };
+  useEffect(() => {
+    // poll health every frame
+    const interval = setInterval(() => {
+      const newHealth = state.state.health;
+      setHealth((prev) => (prev !== newHealth ? newHealth : prev));
+    }, 200); // poll every 100ms
 
-      if (joystick.isJoystickPressed() && angle) {
+    return () => clearInterval(interval);
+  }, []);
+
+  // Play hit sound when health changes
+  useEffect(() => {
+    if (state.state.health < 100) {
+      const audio = new Audio("/audios/hit.mp3");
+      audio.volume = 0.4;
+      audio.play();
+    }
+  }, [state.state.health]);
+
+ useEffect(() => {
+  if (state.state.impact && !state.state.dead) {
+    setAnimation("HitImpact");
+
+    setTimeout(() => {
+      if (!state.state.dead) {
+        state.setState("impact", false); // Clear impact flag after anim duration
+      }
+    }, 500); // Adjust to match the HitImpact anim duration
+  }
+}, [state.state.impact]);
+
+/////////////////////////////     CAMERA AND MOVEMENT      ////////////////////////////////////////////////////
+useFrame(() => {
+  if (cameraRef.current && rBodyRef.current) {
+    const pos = vec3(rBodyRef.current.translation());
+    // cameraRef.current.setLookAt(
+    //   pos.x + 0.2,
+    //   pos.y + cameraDistanceY,
+    //   pos.z + cameraDistanceZ,
+    //   pos.x + 0.2,
+    //   pos.y + 1.5,
+    //   pos.z - 3.2
+    // );
+  }
+
+  if (state.state.dead) {
+    // ✅ Always override with Death animation if dead
+    setAnimation("Death");
+    return;
+  }
+
+  if (rBodyRef.current && characterRef.current) {
+    const angle = joystick.angle();
+    const vel = { x: 0, y: 0, z: 0 };
+
+    // ✅ If hit, play HitImpact. Otherwise, regular logic
+    if (!state.state.impact) {
+      if (joystick.isPressed("attack")) {
+        setAnimation("Slash");
+      } else if (joystick.isJoystickPressed() && angle) {
         setAnimation("Run");
-        characterRef.current.rotation.y = angle;
-        vel.x = Math.sin(angle) * 6;
-        vel.z = Math.cos(angle) * 6;
       } else {
         setAnimation("Idle");
       }
+    }
 
-      rBodyRef.current.setLinvel(vel, true);
+    if (joystick.isJoystickPressed() && angle) {
+      characterRef.current.rotation.y = angle;
+      vel.x = Math.sin(angle) * 6;
+      vel.z = Math.cos(angle) * 6;
+    }
 
-      // Multiplayer sync
-      if (isHost()) {
-        state.setState("pos", rBodyRef.current.translation());
-      } else {
-        const pos = state.getState("pos");
-        if (pos) rBodyRef.current.setTranslation(pos);
-      }
+    rBodyRef.current.setLinvel(vel, true);
 
-      if (joystick.isPressed("attack")) {
-        setAnimation("Slash");
-      }
+    if (isHost()) {
+      state.setState("pos", rBodyRef.current.translation());
+      state.setState("isSlashing", isSlashingRef.current);
+    } else {
+      const pos = state.getState("pos");
+      if (pos) rBodyRef.current.setTranslation(pos);
+    }
 
-      // Move the separate sword collider body
-      if (
-        knightRef.current &&
-        swordBodyRef.current &&
-        typeof knightRef.current.getSwordWorldPosition === "function"
-      ) {
-        const swordPos = knightRef.current.getSwordWorldPosition();
-        const swordQuat = knightRef.current.getSwordWorldQuaternion?.();
+    // Set attack state
+    isSlashingRef.current = joystick.isPressed("attack");
+    if (swordBodyRef.current) {
+      swordBodyRef.current.userData.isSlashing = isSlashingRef.current;
+    }
 
-        if (swordPos && swordQuat) {
-          swordBodyRef.current.setNextKinematicTranslation(swordPos);
-          swordBodyRef.current.setNextKinematicRotation(swordQuat);
-        }
+    // Sword movement sync
+    if (
+      knightRef.current &&
+      swordBodyRef.current &&
+      typeof knightRef.current.getSwordWorldPosition === "function"
+    ) {
+      const swordPos = knightRef.current.getSwordWorldPosition();
+      const swordQuat =
+        knightRef.current.getSwordWorldQuaternion?.() ||
+        new THREE.Quaternion();
+
+      if (swordPos && swordQuat) {
+        swordBodyRef.current.setNextKinematicTranslation(swordPos);
+        swordBodyRef.current.setNextKinematicRotation(swordQuat);
       }
     }
-  });
+  }
+});
+
 
   return (
-    <>
-      <group ref={groupRef} {...props}>
-        {userPlayer && <CameraControls ref={cameraRef} />}
+    <group ref={groupRef} {...props}>
+      {userPlayer && <CameraControls ref={cameraRef} />}
 
-        {/* Sword Collider as a separate RigidBody */}
-        <RigidBody
-          ref={swordBodyRef}
-          type="kinematicPosition"
-          colliders={false}
-        >
-          <CapsuleCollider args={[0.65, 0.1]} rotation={[Math.PI/2 + 0.05, 0, 0.25]} position={[-0.16, -0.04, 0.7]} sensor />
-        </RigidBody>
+      {/* Sword Collider */}
+      <RigidBody
+        ref={swordBodyRef}
+        type="kinematicPosition"
+        colliders={false}
+        sensor
+        userData={{ type: "sword", damage: 50, player: state.id }}
+      >
+        <CapsuleCollider
+          args={[0.85, 0.1]}
+          rotation={[Math.PI / 2 + 0.05, 0, 0.25]} // tweak if needed
+          position={[-0.16, -0.04, 0.7]}
+          sensor
+        />
+      </RigidBody>
 
-        <RigidBody
-          ref={rBodyRef}
-          colliders={false}
-          lockRotations
-          linearDamping={12}
-          type={isHost() ? "dynamic" : "kinematicPosition"}
-        >
-          <PlayerInfo state={state.state} />
-          <group ref={characterRef}>
-            <Knight
-              ref={knightRef}
-              color={state.state.profile?.color}
-              animation={animation}
-            />
-          </group>
+      <RigidBody
+        ref={rBodyRef}
+        colliders={false}
+        lockRotations
+        linearDamping={12}
+        type={isHost() ? "dynamic" : "kinematicPosition"}
+        onIntersectionEnter={({ other }) => {
+          const now = Date.now();
+          const attackerId = other.rigidBody.userData.player;
+          const isSword = other.rigidBody.userData.type === "sword";
+          const attackerIsSlashing = other.rigidBody.userData.isSlashing;
 
-          <CapsuleCollider args={[0.95, 0.2]} position={[0, 1.1, 0.1]} />
-        </RigidBody>
-      </group>
-    </>
+          // Cooldown: avoid repeated hits
+          const lastHitTime = lastHitTimeRef.current[attackerId] || 0;
+          const HIT_COOLDOWN = 700; // ms — adjust as needed
+
+          if (
+            isHost() &&
+            isSword &&
+            !state.state.dead &&
+            attackerId !== state.id &&
+            attackerIsSlashing &&
+            now - lastHitTime > HIT_COOLDOWN
+          ) {
+            lastHitTimeRef.current[attackerId] = now;
+            // console.log(attackerId + " hits " + state.id);
+
+            const newHealth =
+              state.state.health - other.rigidBody.userData.damage;
+
+            if (newHealth <= 0) {
+              state.setState("deaths", state.state.deaths + 1);
+              state.setState("dead", true);
+              // console.log(attackerId + " killed " + state.id );
+              state.setState("health", 0);
+              rBodyRef.current.setEnabled(false);
+              swordBodyRef.current.setEnabled(false);
+
+              setTimeout(() => {
+                rBodyRef.current.setEnabled(true);
+                swordBodyRef.current.setEnabled(true);
+                state.setState("dead", false);
+                state.setState("health", 100);
+              }, 5000);
+              onKilled(state.id, other.rigidBody.userData.player);
+            } else {
+              state.setState("health", newHealth);
+              state.setState("impact", true); // trigger impact
+
+            }
+          }
+        }}
+      >
+        <PlayerInfo health={health} state={state.state} />
+        <group ref={characterRef}>
+          <Knight
+            ref={knightRef}
+            color={state.state.profile?.color}
+            animation={animation}
+            scale={0.66}
+          />
+        </group>
+        <CapsuleCollider args={[0.95, 0.2]} position={[0, 1.1, 0.1]} />
+      </RigidBody>
+    </group>
   );
 };
 
@@ -123,17 +238,21 @@ const PlayerInfo = ({ state }) => {
   const health = state.health;
   const name = state.profile.name;
   return (
-    <Billboard position-y={2.7} >
-      <Text position-y={0.26} fontSize={0.2}>
+    <Billboard position-y={2.7}>
+      <Text position-y={0.3} fontSize={0.2}>
         {name}
         <meshBasicMaterial color={"black"} />
       </Text>
-      <mesh position-z={-0.001}>
-        <planeGeometry args={[1, 0.2]} />
+      <mesh position-z={-0.001} position-y={0.16}>
+        <planeGeometry args={[1, 0.07]} />
         <meshBasicMaterial color="black" transparent opacity={0.5} />
       </mesh>
-      <mesh scale-x={health / 100} position-x={-0.5 * (1 - health / 100)}>
-        <planeGeometry args={[1, 0.2]} />
+      <mesh
+        scale-x={health / 100}
+        position-x={-0.5 * (1 - health / 100)}
+        position-y={0.16}
+      >
+        <planeGeometry args={[1, 0.07]} />
         <meshBasicMaterial color="red" />
       </mesh>
     </Billboard>

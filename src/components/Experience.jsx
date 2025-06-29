@@ -40,6 +40,12 @@ export const Experience = () => {
   useEffect(() => {
     start();
   }, []);
+
+  const onKilled = (_victim, killer) => {
+    const killerState = players.find((p) => p.state.id === killer).state;
+    killerState.setState("kills", killerState.state.kills + 1);
+  };
+
   const lightRef = useRef();
   const shadowCameraRef = useRef();
 
@@ -67,13 +73,13 @@ export const Experience = () => {
         shadow-camera-bottom={-20}
       ></directionalLight>
 
-      <Physics debug>
+      <Physics>
         {/* Ground Plane */}
         <Plane />
 
         {/* <CharacterController /> */}
         {/* <Character scale={1} position-y={0} animation="Idle" color="red"/> */}
-        {console.log(players)}
+        {/* {console.log(players)} */}
         {players.map(({ state, joystick }, idx) => {
           return (
             <Controller
@@ -81,17 +87,18 @@ export const Experience = () => {
               position-x={idx * 2}
               state={state}
               joystick={joystick}
+              onKilled={onKilled}
               userPlayer={state.id === myPlayer()?.id}
             />
           );
         })}
       </Physics>
-      {/* <fogExp2 attach="fog" color="#cad4db" density={0.1} />
-      <mesh>
+      <fogExp2 attach="fog" color="#cad4db" density={0.1} />
+      {/* <mesh>
         <boxGeometry args={[100, 100, 100]} />
         <meshStandardMaterial color="#78623b" side={2}/>
-      </mesh>
-      <InstancedGrass/> */}
+      </mesh> */}
+      {/* <InstancedGrass fieldSize={50} count={200000} grassScale={0.8}/> */}
 
     </>
   );

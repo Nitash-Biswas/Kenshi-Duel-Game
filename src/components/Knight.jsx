@@ -17,6 +17,15 @@ const Knight = forwardRef(({animation, color = "blue", ...props}, ref) => {
   const { nodes, materials } = useGraph(clone)
   const { actions, names } = useAnimations(animations, group)
 
+  if (actions["Death"]) {
+    actions["Death"].loop = THREE.LoopOnce;
+    actions["Death"].clampWhenFinished = true;
+  }
+  if (actions["HitImpact"]) {
+    actions["HitImpact"].loop = THREE.LoopOnce;
+    actions["HitImpact"].clampWhenFinished = true;
+  }
+
   // Fade in and out animation when switching between animations
   useEffect(() => {
       actions[animation]?.reset().fadeIn(0.24).play();
@@ -41,9 +50,6 @@ const Knight = forwardRef(({animation, color = "blue", ...props}, ref) => {
   }
 }));
 
-
-  console.log(nodes)
-
   return (
     <group ref={group} {...props} dispose={null}>
       <group name="Scene">
@@ -52,8 +58,9 @@ const Knight = forwardRef(({animation, color = "blue", ...props}, ref) => {
           <skinnedMesh name="Paladin_J_Sword" geometry={nodes.Paladin_J_Nordstrom.geometry} material={materials.Paladin_MAT} skeleton={nodes.Paladin_J_Nordstrom.skeleton} >
             <meshStandardMaterial color={color} />
           </skinnedMesh>
-          <skinnedMesh name="Paladin_J_Nordstrom_Shield" geometry={nodes.Paladin_J_Nordstrom_Helmet.geometry} material={materials.Paladin_MAT} skeleton={nodes.Paladin_J_Nordstrom_Helmet.skeleton} />
-
+          <skinnedMesh name="Paladin_J_Nordstrom_Shield" geometry={nodes.Paladin_J_Nordstrom_Helmet.geometry} material={materials.Paladin_MAT} skeleton={nodes.Paladin_J_Nordstrom_Helmet.skeleton} >
+          <meshStandardMaterial color={color} />
+          </skinnedMesh>
           <skinnedMesh name="Paladin_J_Nordstrom_Helmet" geometry={nodes.Paladin_J_Nordstrom_Shield.geometry} material={materials.Paladin_MAT} skeleton={nodes.Paladin_J_Nordstrom_Shield.skeleton} />
 
           <skinnedMesh name="Paladin_J_Nordstrom_Body" geometry={nodes.Paladin_J_Nordstrom_Sword.geometry} material={materials.Paladin_MAT} skeleton={nodes.Paladin_J_Nordstrom_Sword.skeleton} />

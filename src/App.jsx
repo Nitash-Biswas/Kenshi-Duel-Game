@@ -3,9 +3,12 @@ import {
   GizmoHelper,
   GizmoViewport,
   KeyboardControls,
+  Loader,
   OrbitControls,
 } from "@react-three/drei";
 import { Experience } from "./components/Experience";
+import { Suspense } from "react";
+import { Leaderboard } from "./components/Leaderboard";
 //import { Perf } from "r3f-perf";
 
 // Define keyboard control mappings
@@ -14,28 +17,33 @@ const keyboardMap = [
   { name: "backward", keys: ["KeyS", "ArrowDown"] },
   { name: "left", keys: ["KeyA", "ArrowLeft"] },
   { name: "right", keys: ["KeyD", "ArrowRight"] },
-  { name: "run", keys: ["Shift"] },
+  { name: "slash", keys: ["LButton"] },
 ];
 
 function App() {
   return (
+    <>
+    <Loader/>
     <KeyboardControls map={keyboardMap}>
-      <Canvas shadows >
+      <Leaderboard/>
+      <Canvas shadows>
         {/* Debug Gizmo and Axes */}
         <GizmoHelper alignment="bottom-right" margin={[100, 100]}>
           <GizmoViewport />
         </GizmoHelper>
         {/* <axesHelper args={[5]} /> */}
         {/* <Perf position="top-left" /> */}
-        {/* <OrbitControls/> */}
+        <OrbitControls/>
         {/* <mesh position={[2,2,2]}>
           <planeGeometry />
           <meshNormalMaterial side={2} />
         </mesh> */}
-
-        <Experience />
+        <Suspense>
+          <Experience />
+        </Suspense>
       </Canvas>
     </KeyboardControls>
+    </>
   );
 }
 

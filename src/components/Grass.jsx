@@ -5,13 +5,10 @@ import grassVertexShader from "../shaders/vertex.glsl";
 import grassFragmentShader from "../shaders/fragment.glsl";
 import { useControls } from "leva";
 
-export const InstancedGrass = () => {
+export const InstancedGrass = ({count = 200000, fieldSize = 60, grassScale = 1, ...props }) => {
 
   const instanceRef = useRef();
   const { clock } = useThree();
-  const COUNT = 200000;
-  const GRASSWIDTH = 60;
-  const GRASSLENGTH = 60;
   const halfWidth = 0.06;
   const height = 1;
 
@@ -93,10 +90,11 @@ useEffect(() => {
   if (!instanceRef.current) return;
 
   const dummy = new THREE.Object3D();
-  for (let i = 0; i < COUNT; i++) {
-  const x = (Math.random() - 0.5) * GRASSLENGTH;
-  const z = (Math.random() - 0.5) * GRASSWIDTH;
+  for (let i = 0; i < count; i++) {
+  const x = (Math.random() - 0.5) * fieldSize;
+  const z = (Math.random() - 0.5) * fieldSize;
   dummy.position.set(x, 0, z);
+  dummy.scale.set(grassScale, grassScale, grassScale);
   dummy.rotation.y = Math.random() * Math.PI * 2;
   dummy.updateMatrix();
   instanceRef.current.setMatrixAt(i, dummy.matrix);
@@ -114,7 +112,7 @@ const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
   return (
     <instancedMesh
       ref={instanceRef}
-      args={[grassGeometry, material, COUNT]}
+      args={[grassGeometry, material, count]}
     />
   );
 };

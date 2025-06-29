@@ -14,12 +14,14 @@
     "@react-three/fiber": "8.13.4",
     "@react-three/postprocessing": "^2.15.1",
     "@react-three/rapier": "^1.1.1",
+    "@tailwindcss/vite": "^4.1.11",
     "@types/three": "^0.177.0",
     "leva": "^0.9.35",
     "playroomkit": "^0.0.36",
     "r3f-perf": "^7.2.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "tailwindcss": "^4.1.11",
     "three": "^0.157.0",
     "three-stdlib": "^2.27.1"
   },
@@ -33,7 +35,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.3",
     "vite": "^6.3.5",
     "vite-plugin-glsl": "^1.4.2"
   }

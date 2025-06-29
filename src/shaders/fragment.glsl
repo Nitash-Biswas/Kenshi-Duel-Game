@@ -62,7 +62,7 @@ void main()
     finalColor *= light;
 
     float dist = length(cameraPosition - vPosition);
-    float fogFactor = smoothstep(5.0, 20.0, dist);
+    float fogFactor = smoothstep(5.0, 40.0, dist);
     finalColor = mix(finalColor, uFogColor, fogFactor);
 
     gl_FragColor = vec4(finalColor, 1.0);

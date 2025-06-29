@@ -25,8 +25,8 @@ export const Controller = ({
   const [health, setHealth] = useState(state.state.health);
   const [animation, setAnimation] = useState("Idle");
 
-  const cameraDistanceY = window.innerWidth < 1024 ? 5.0 : 3.2;
-  const cameraDistanceZ = window.innerWidth < 1024 ? 2.6 : 3.0;
+  const cameraDistanceY = window.innerWidth < 1024 ? 3.0 : 3.2;
+  const cameraDistanceZ = window.innerWidth < 1024 ? 3.8 : 3.6;
 
   ////////////////     AUDIO EFFECTS      ////////////////////////////////////////////////////
 
@@ -73,14 +73,16 @@ export const Controller = ({
 useFrame(() => {
   if (cameraRef.current && rBodyRef.current) {
     const pos = vec3(rBodyRef.current.translation());
-    // cameraRef.current.setLookAt(
-    //   pos.x + 0.2,
-    //   pos.y + cameraDistanceY,
-    //   pos.z + cameraDistanceZ,
-    //   pos.x + 0.2,
-    //   pos.y + 1.5,
-    //   pos.z - 3.2
-    // );
+    cameraRef.current.setLookAt(
+      // Camera position
+      pos.x + 0.2,
+      pos.y + cameraDistanceY,
+      pos.z + cameraDistanceZ,
+      // Look at
+      pos.x + 0.2,
+      pos.y + 1.5,
+      pos.z - 3.2
+    );
   }
 
   if (state.state.dead) {

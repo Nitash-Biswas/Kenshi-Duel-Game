@@ -2,18 +2,20 @@
 import { Environment, OrthographicCamera, Sky } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import { Physics } from "@react-three/rapier";
-import CharacterController from "./CharacterController";
 import Plane from "./Plane";
 import { InstancedGrass } from "./Grass";
 import { Fog } from "three";
 import { insertCoin, Joystick, myPlayer, onPlayerJoin } from "playroomkit";
-import Character from "./Character";
 import { Controller } from "./Controller";
-
+import { Map } from "./Map";
+import { Bloom, EffectComposer, GodRays, Noise } from "@react-three/postprocessing";
+import * as THREE from "three";
 
 
 export const Experience = () => {
   const [players, setPlayers] = useState([]);
+
+
   const start = async () => {
     // Start the game
     await insertCoin();
@@ -48,6 +50,7 @@ export const Experience = () => {
 
   const lightRef = useRef();
   const shadowCameraRef = useRef();
+  const sunRef = useRef();
 
   return (
     <>
@@ -76,6 +79,7 @@ export const Experience = () => {
       <Physics>
         {/* Ground Plane */}
         <Plane />
+        <Map scale={0.66}/>
 
         {/* <CharacterController /> */}
         {/* <Character scale={1} position-y={0} animation="Idle" color="red"/> */}
@@ -93,12 +97,13 @@ export const Experience = () => {
           );
         })}
       </Physics>
-      <fogExp2 attach="fog" color="#cad4db" density={0.1} />
-      {/* <mesh>
+      <fogExp2 attach="fog" color="#cad4db" density={0.05} />
+      <mesh>
         <boxGeometry args={[100, 100, 100]} />
         <meshStandardMaterial color="#78623b" side={2}/>
-      </mesh> */}
-      {/* <InstancedGrass fieldSize={50} count={200000} grassScale={0.8}/> */}
+      </mesh>
+
+      <InstancedGrass fieldSize={60} count={250000} grassScale={0.8}/>
 
     </>
   );

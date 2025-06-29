@@ -33,7 +33,7 @@ function App() {
         </GizmoHelper>
         {/* <axesHelper args={[5]} /> */}
         {/* <Perf position="top-left" /> */}
-        <OrbitControls/>
+        {/* <OrbitControls/> */}
         {/* <mesh position={[2,2,2]}>
           <planeGeometry />
           <meshNormalMaterial side={2} />

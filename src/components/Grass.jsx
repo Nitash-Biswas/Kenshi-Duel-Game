@@ -5,7 +5,7 @@ import grassVertexShader from "../shaders/vertex.glsl";
 import grassFragmentShader from "../shaders/fragment.glsl";
 import { useControls } from "leva";
 
-export const InstancedGrass = ({ count = 200000, fieldSize = 60, grassScale = 0.8, LODDistance = 20 }) => {
+export const InstancedGrass = ({ count = 300000, fieldSize = 60, grassScale = 0.8, LODDistance = 20 }) => {
   const highDetailRef = useRef();
   const lowDetailRef = useRef();
   const { camera, clock } = useThree();
@@ -94,7 +94,7 @@ export const InstancedGrass = ({ count = 200000, fieldSize = 60, grassScale = 0.
   useEffect(() => {
     let previousPosition = new THREE.Vector3().copy(camera.position);
     const dummy = new THREE.Object3D();
-    console.log(camera.near, camera.far, camera.position.length());
+
     const updateLOD = () => {
       const currentPosition = camera.position.clone();
       const moved = currentPosition.distanceToSquared(previousPosition) > 0.0001;
@@ -139,7 +139,6 @@ export const InstancedGrass = ({ count = 200000, fieldSize = 60, grassScale = 0.
     updateLOD();
 
     return () => {
-      // nothing to clean up here, since RAF is recursive
     };
   }, [camera, grassData, grassScale, LODDistance]);
 

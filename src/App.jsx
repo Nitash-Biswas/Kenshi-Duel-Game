@@ -17,7 +17,6 @@ const keyboardMap = [
   { name: "backward", keys: ["KeyS", "ArrowDown"] },
   { name: "left", keys: ["KeyA", "ArrowLeft"] },
   { name: "right", keys: ["KeyD", "ArrowRight"] },
-  { name: "slash", keys: ["LButton"] },
 ];
 
 function App() {

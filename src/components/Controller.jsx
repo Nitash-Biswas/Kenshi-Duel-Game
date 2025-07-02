@@ -26,14 +26,14 @@ export const Controller = ({
   const [animation, setAnimation] = useState("Idle");
 
   const cameraDistanceY = window.innerWidth < 1024 ? 3.0 : 3.2;
-  const cameraDistanceZ = window.innerWidth < 1024 ? 3.8 : 3.6;
+  const cameraDistanceZ = window.innerWidth < 1024 ? 4.8 : 4.6;
 
   ////////////////     AUDIO EFFECTS      ////////////////////////////////////////////////////
 
   useEffect(() => {
     if (state.state.dead) {
       const audio = new Audio("/audios/dead.mp3");
-      audio.volume = 0.5;
+      audio.volume = 0.3;
       audio.play();
     }
   }, [state.state.dead]);
@@ -168,6 +168,7 @@ useFrame(() => {
         />
       </RigidBody>
 
+      {/* Body Collider */}
       <RigidBody
         ref={rBodyRef}
         colliders={false}
@@ -182,7 +183,7 @@ useFrame(() => {
 
           // Cooldown: avoid repeated hits
           const lastHitTime = lastHitTimeRef.current[attackerId] || 0;
-          const HIT_COOLDOWN = 700; // ms — adjust as needed
+          const HIT_COOLDOWN = 700; // ms
 
           if (
             isHost() &&
@@ -236,23 +237,25 @@ useFrame(() => {
   );
 };
 
+// PlayerInfo component to display health and name
+
 const PlayerInfo = ({ state }) => {
   const health = state.health;
   const name = state.profile.name;
   return (
-    <Billboard position-y={2.7}>
-      <Text position-y={0.3} fontSize={0.2}>
+    <Billboard position-y={2.7} >
+      <Text position-y={-0.3} fontSize={0.2}>
         {name}
         <meshBasicMaterial color={"black"} />
       </Text>
-      <mesh position-z={-0.001} position-y={0.16}>
+      <mesh position-z={-0.001} position-y={-0.46}>
         <planeGeometry args={[1, 0.07]} />
         <meshBasicMaterial color="black" transparent opacity={0.5} />
       </mesh>
       <mesh
         scale-x={health / 100}
         position-x={-0.5 * (1 - health / 100)}
-        position-y={0.16}
+        position-y={-0.46}
       >
         <planeGeometry args={[1, 0.07]} />
         <meshBasicMaterial color="red" />

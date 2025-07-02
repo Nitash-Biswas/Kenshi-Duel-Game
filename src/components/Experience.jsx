@@ -97,13 +97,13 @@ export const Experience = () => {
           );
         })}
       </Physics>
-      <fogExp2 attach="fog" color="#cad4db" density={0.05} />
-      <mesh>
+      {/* <fogExp2 attach="fog" color="#cad4db" density={0.05} /> */}
+      {/* <mesh>
         <boxGeometry args={[100, 100, 100]} />
         <meshStandardMaterial color="#78623b" side={2}/>
-      </mesh>
+      </mesh> */}
 
-      <InstancedGrass fieldSize={60} count={250000} grassScale={0.8}/>
+      <InstancedGrass/>
 
     </>
   );

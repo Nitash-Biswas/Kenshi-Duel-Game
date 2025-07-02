@@ -9,7 +9,7 @@ import {
 import { Experience } from "./components/Experience";
 import { Suspense } from "react";
 import { Leaderboard } from "./components/Leaderboard";
-//import { Perf } from "r3f-perf";
+// import { Perf } from "r3f-perf";
 
 // Define keyboard control mappings
 const keyboardMap = [
@@ -28,9 +28,9 @@ function App() {
       <Leaderboard/>
       <Canvas shadows>
         {/* Debug Gizmo and Axes */}
-        <GizmoHelper alignment="bottom-right" margin={[100, 100]}>
+        {/* <GizmoHelper alignment="bottom-right" margin={[100, 100]}>
           <GizmoViewport />
-        </GizmoHelper>
+        </GizmoHelper> */}
         {/* <axesHelper args={[5]} /> */}
         {/* <Perf position="top-left" /> */}
         {/* <OrbitControls/> */}

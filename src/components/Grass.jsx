@@ -94,7 +94,7 @@ export const InstancedGrass = ({ count = 200000, fieldSize = 60, grassScale = 0.
   useEffect(() => {
     let previousPosition = new THREE.Vector3().copy(camera.position);
     const dummy = new THREE.Object3D();
-
+    console.log(camera.near, camera.far, camera.position.length());
     const updateLOD = () => {
       const currentPosition = camera.position.clone();
       const moved = currentPosition.distanceToSquared(previousPosition) > 0.0001;
@@ -123,6 +123,12 @@ export const InstancedGrass = ({ count = 200000, fieldSize = 60, grassScale = 0.
 
         highDetailRef.current.count = highIndex;
         lowDetailRef.current.count = lowIndex;
+        // Disable frustum culling for instanced meshes
+        // This is important for LODs to work correctly, as they are culled by the camera frustum
+        // Otherwise, they might not render if they are outside the camera's view
+        highDetailRef.current.frustumCulled = false;
+        lowDetailRef.current.frustumCulled = false;
+
         highDetailRef.current.instanceMatrix.needsUpdate = true;
         lowDetailRef.current.instanceMatrix.needsUpdate = true;
       }

@@ -26,7 +26,7 @@ function App() {
     <Loader/>
     <KeyboardControls map={keyboardMap}>
       <Leaderboard/>
-      <Canvas shadows>
+      <Canvas shadows resize={{ scroll: false }}>
         {/* Debug Gizmo and Axes */}
         {/* <GizmoHelper alignment="bottom-right" margin={[100, 100]}>
           <GizmoViewport />

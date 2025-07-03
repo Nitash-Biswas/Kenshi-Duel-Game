@@ -57,37 +57,37 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
     }
   }, [state.state.impact]);
 
-  // useEffect(() => {
-  //   const { cinematicFor } = state.state;
-  //   const myId = myPlayer()?.id;
-  //   console.log(cinematicFor, myId);
-  //   if (
-  //     cinematicFor &&
-  //     (cinematicFor.killer === myId || cinematicFor.victim === myId) &&
-  //     cinematicStartTime.current !== cinematicFor.startTime
-  //   ) {
-  //     cinematicStartTime.current = cinematicFor.startTime;
-  //     setIsCinematic(true);
-  //   } else if (!cinematicFor) {
-  //     setIsCinematic(false);
-  //   }
-  // }, [state.state.cinematicFor]);
+  useEffect(() => {
+    const { cinematicFor } = state.state;
+    const myId = myPlayer()?.id;
+    console.log(cinematicFor, myId);
+    if (
+      cinematicFor &&
+      (cinematicFor.killer === myId || cinematicFor.victim === myId) &&
+      cinematicStartTime.current !== cinematicFor.startTime
+    ) {
+      cinematicStartTime.current = cinematicFor.startTime;
+      setIsCinematic(true);
+    } else if (!cinematicFor) {
+      setIsCinematic(false);
+    }
+  }, [state.state.cinematicFor]);
 
   useFrame(() => {
     if (cameraRef.current && rBodyRef.current) {
       const pos = vec3(rBodyRef.current.translation());
 
-      // if (isCinematic) {
-      //   const elapsed = (Date.now() - cinematicStartTime.current) / 1000;
-      //   const radius = 5;
-      //   const height = 2.5;
-      //   const angle = elapsed * 0.5;
-      //   const camX = pos.x + radius * Math.cos(angle);
-      //   const camZ = pos.z + radius * Math.sin(angle);
-      //   const camY = pos.y + height + Math.sin(elapsed * 1.5) * 0.5;
-      //   cameraRef.current.setLookAt(camX, camY, camZ, pos.x, pos.y + 1, pos.z);
-      //   return;
-      // }
+      if (isCinematic) {
+        const elapsed = (Date.now() - cinematicStartTime.current) / 1000;
+        const radius = 5;
+        const height = 2.5;
+        const angle = elapsed * 0.5;
+        const camX = pos.x + radius * Math.cos(angle);
+        const camZ = pos.z + radius * Math.sin(angle);
+        const camY = pos.y + height + Math.sin(elapsed * 1.5) * 0.5;
+        cameraRef.current.setLookAt(camX, camY, camZ, pos.x, pos.y + 1, pos.z);
+        return;
+      }
 
       cameraRef.current.setLookAt(
         pos.x + 0.2,
@@ -202,18 +202,18 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
               rBodyRef.current.setEnabled(false);
               swordBodyRef.current.setEnabled(false);
 
-              // state.setState("cinematicFor", {
-              //   killer: attackerId,
-              //   victim: state.id,
-              //   startTime: Date.now(),
-              // });
+              state.setState("cinematicFor", {
+                killer: attackerId,
+                victim: state.id,
+                startTime: Date.now(),
+              });
 
               setTimeout(() => {
                 rBodyRef.current.setEnabled(true);
                 swordBodyRef.current.setEnabled(true);
                 state.setState("dead", false);
                 state.setState("health", 100);
-                // if (isHost()) state.setState("cinematicFor", null);
+                if (isHost()) state.setState("cinematicFor", null);
               }, 5000);
 
               onKilled(state.id, attackerId);

@@ -5,7 +5,7 @@ import grassVertexShader from "../shaders/vertex.glsl";
 import grassFragmentShader from "../shaders/fragment.glsl";
 import { useControls } from "leva";
 
-export const InstancedGrass = ({ count = 300000, fieldSize = 60, grassScale = 0.8, LODDistance = 20 }) => {
+export const InstancedGrass = ({ count = 200000, fieldSize = 60, grassScale = 0.8, LODDistance = 20 }) => {
   const highDetailRef = useRef();
   const lowDetailRef = useRef();
   const { camera, clock } = useThree();
@@ -47,7 +47,7 @@ export const InstancedGrass = ({ count = 300000, fieldSize = 60, grassScale = 0.
     return geo;
   };
 
-  const highDetailGeo = useMemo(() => createGrassGeometry(7), []);
+  const highDetailGeo = useMemo(() => createGrassGeometry(6), []);
   const lowDetailGeo = useMemo(() => createGrassGeometry(2), []);
 
   const material = useMemo(() => new THREE.ShaderMaterial({

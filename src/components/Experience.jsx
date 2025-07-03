@@ -76,7 +76,7 @@ export const Experience = () => {
         shadow-camera-bottom={-20}
       ></directionalLight>
 
-      <Physics>
+      <Physics >
         {/* Ground Plane */}
         <Plane />
         <Map scale={0.66}/>

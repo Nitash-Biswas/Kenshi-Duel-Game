@@ -7,24 +7,23 @@ import {
   OrbitControls,
 } from "@react-three/drei";
 import { Experience } from "./components/Experience";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { Leaderboard } from "./components/Leaderboard";
+import { JoystickOverlay } from "./components/UIOverlay";
 // import { Perf } from "r3f-perf";
 
 // Define keyboard control mappings
-const keyboardMap = [
-  { name: "forward", keys: ["KeyW", "ArrowUp"] },
-  { name: "backward", keys: ["KeyS", "ArrowDown"] },
-  { name: "left", keys: ["KeyA", "ArrowLeft"] },
-  { name: "right", keys: ["KeyD", "ArrowRight"] },
-];
+
+
 
 function App() {
+
   return (
     <>
     <Loader/>
-    <KeyboardControls map={keyboardMap}>
+
       <Leaderboard/>
+      <JoystickOverlay enabled={true} />
       <Canvas shadows resize={{ scroll: false }}>
         {/* Debug Gizmo and Axes */}
         {/* <GizmoHelper alignment="bottom-right" margin={[100, 100]}>
@@ -41,7 +40,7 @@ function App() {
           <Experience />
         </Suspense>
       </Canvas>
-    </KeyboardControls>
+
     </>
   );
 }

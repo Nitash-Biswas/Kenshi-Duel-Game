@@ -15,9 +15,11 @@ export const Leaderboard = () => {
               className="w-10 h-10 border-2 rounded-full"
               style={{
                 borderColor: player.state.profile?.color,
+                borderWidth: "4px",
+              borderStyle: "solid",
               }}
             />
-            <div className="flex-grow">
+            <div className="flex-grow" >
               <h2 className={`font-bold text-sm`}>
                 {player.state.profile?.name}
               </h2>

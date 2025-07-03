@@ -2,17 +2,11 @@ import { CapsuleCollider, RigidBody, vec3 } from "@react-three/rapier";
 import { useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import Knight from "./Knight";
-import {
-  Billboard,
-  CameraControls,
-  Text,
-  useKeyboardControls,
-} from "@react-three/drei";
+import { Billboard, CameraControls, Text } from "@react-three/drei";
 import * as THREE from "three";
-import { isHost } from "playroomkit";
+import { isHost, myPlayer } from "playroomkit";
 
 export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) => {
-  // Refs
   const groupRef = useRef();
   const characterRef = useRef();
   const rBodyRef = useRef();
@@ -22,50 +16,22 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
   const lastHitTimeRef = useRef({});
   const isSlashingRef = useRef(false);
 
-  // State
   const [health, setHealth] = useState(state.state.health);
   const [animation, setAnimation] = useState("Idle");
-  const [mouseDown, setMouseDown] = useState(false);
-  const [_, getKeys] = useKeyboardControls();
+  const [isCinematic, setIsCinematic] = useState(false);
+  const cinematicStartTime = useRef(null);
 
-  // Camera offsets
-  const cameraDistanceY = window.innerWidth < 1024 ? 3.0 : 3.2;
-  const cameraDistanceZ = window.innerWidth < 1024 ? 4.8 : 4.6;
+  const cameraDistanceY = window.innerWidth < 1024 ? 5.0 : 5.2;
+  const cameraDistanceZ = window.innerWidth < 1024 ? 4.6 : 4.3;
 
-  // Compute direction angle based on keyboard
-  const getKeyboardAngle = () => {
-    const { forward, backward, left, right } = getKeys();
-    let dx = 0, dz = 0;
-    if (forward) dz -= 1;
-    if (backward) dz += 1;
-    if (left) dx -= 1;
-    if (right) dx += 1;
-    if (dx === 0 && dz === 0) return null;
-    return Math.atan2(dx, dz);
-  };
-
-  // Mouse input
-  useEffect(() => {
-    const handleMouseDown = (e) => e.button === 0 && setMouseDown(true);
-    const handleMouseUp = (e) => e.button === 0 && setMouseDown(false);
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, []);
-
-  // Play death sound
   useEffect(() => {
     if (state.state.dead) {
       const audio = new Audio("/audios/dead.mp3");
-      audio.volume = 0.3;
+      audio.volume = 0.5;
       audio.play();
     }
   }, [state.state.dead]);
 
-  // Health polling
   useEffect(() => {
     const interval = setInterval(() => {
       const newHealth = state.state.health;
@@ -74,7 +40,6 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
     return () => clearInterval(interval);
   }, []);
 
-  // Hit sound
   useEffect(() => {
     if (state.state.health < 100) {
       const audio = new Audio("/audios/hit.mp3");
@@ -83,7 +48,6 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
     }
   }, [state.state.health]);
 
-  // Impact animation
   useEffect(() => {
     if (state.state.impact && !state.state.dead) {
       setAnimation("HitImpact");
@@ -93,10 +57,38 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
     }
   }, [state.state.impact]);
 
-  // Frame update
+  // useEffect(() => {
+  //   const { cinematicFor } = state.state;
+  //   const myId = myPlayer()?.id;
+  //   console.log(cinematicFor, myId);
+  //   if (
+  //     cinematicFor &&
+  //     (cinematicFor.killer === myId || cinematicFor.victim === myId) &&
+  //     cinematicStartTime.current !== cinematicFor.startTime
+  //   ) {
+  //     cinematicStartTime.current = cinematicFor.startTime;
+  //     setIsCinematic(true);
+  //   } else if (!cinematicFor) {
+  //     setIsCinematic(false);
+  //   }
+  // }, [state.state.cinematicFor]);
+
   useFrame(() => {
     if (cameraRef.current && rBodyRef.current) {
       const pos = vec3(rBodyRef.current.translation());
+
+      // if (isCinematic) {
+      //   const elapsed = (Date.now() - cinematicStartTime.current) / 1000;
+      //   const radius = 5;
+      //   const height = 2.5;
+      //   const angle = elapsed * 0.5;
+      //   const camX = pos.x + radius * Math.cos(angle);
+      //   const camZ = pos.z + radius * Math.sin(angle);
+      //   const camY = pos.y + height + Math.sin(elapsed * 1.5) * 0.5;
+      //   cameraRef.current.setLookAt(camX, camY, camZ, pos.x, pos.y + 1, pos.z);
+      //   return;
+      // }
+
       cameraRef.current.setLookAt(
         pos.x + 0.2,
         pos.y + cameraDistanceY,
@@ -113,26 +105,16 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
     }
 
     if (rBodyRef.current && characterRef.current) {
-      let angle = null;
-      let isMoving = false;
-      if (joystick.isJoystickPressed()) {
-        angle = joystick.angle();
-        isMoving = true;
-      } else {
-        angle = getKeyboardAngle();
-        isMoving = angle !== null;
-      }
-
-      const isAttacking = joystick.isPressed("attack") || mouseDown;
+      const angle = joystick.angle();
       const vel = { x: 0, y: 0, z: 0 };
 
       if (!state.state.impact) {
-        if (isAttacking) setAnimation("Slash");
-        else if (isMoving && angle !== null) setAnimation("Run");
+        if (joystick.isPressed("attack")) setAnimation("Slash");
+        else if (joystick.isJoystickPressed() && angle) setAnimation("Run");
         else setAnimation("Idle");
       }
 
-      if (isMoving && angle !== null) {
+      if (joystick.isJoystickPressed() && angle) {
         characterRef.current.rotation.y = angle;
         vel.x = Math.sin(angle) * 6;
         vel.z = Math.cos(angle) * 6;
@@ -148,7 +130,7 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
         if (pos) rBodyRef.current.setTranslation(pos);
       }
 
-      isSlashingRef.current = isAttacking;
+      isSlashingRef.current = joystick.isPressed("attack");
       if (swordBodyRef.current)
         swordBodyRef.current.userData.isSlashing = isSlashingRef.current;
 
@@ -159,6 +141,7 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
       ) {
         const swordPos = knightRef.current.getSwordWorldPosition();
         const swordQuat = knightRef.current.getSwordWorldQuaternion?.() || new THREE.Quaternion();
+
         if (swordPos && swordQuat) {
           swordBodyRef.current.setNextKinematicTranslation(swordPos);
           swordBodyRef.current.setNextKinematicRotation(swordQuat);
@@ -171,7 +154,6 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
     <group ref={groupRef} {...props}>
       {userPlayer && <CameraControls ref={cameraRef} />}
 
-      {/* Sword Collider */}
       <RigidBody
         ref={swordBodyRef}
         type="kinematicPosition"
@@ -187,7 +169,6 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
         />
       </RigidBody>
 
-      {/* Player Collider and Model */}
       <RigidBody
         ref={rBodyRef}
         colliders={false}
@@ -201,7 +182,7 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
           const attackerIsSlashing = other.rigidBody.userData.isSlashing;
 
           const lastHitTime = lastHitTimeRef.current[attackerId] || 0;
-          const HIT_COOLDOWN = 700;
+          const HIT_COOLDOWN = 1000;
 
           if (
             isHost() &&
@@ -221,14 +202,21 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
               rBodyRef.current.setEnabled(false);
               swordBodyRef.current.setEnabled(false);
 
+              // state.setState("cinematicFor", {
+              //   killer: attackerId,
+              //   victim: state.id,
+              //   startTime: Date.now(),
+              // });
+
               setTimeout(() => {
                 rBodyRef.current.setEnabled(true);
                 swordBodyRef.current.setEnabled(true);
                 state.setState("dead", false);
                 state.setState("health", 100);
+                // if (isHost()) state.setState("cinematicFor", null);
               }, 5000);
 
-              onKilled(state.id, other.rigidBody.userData.player);
+              onKilled(state.id, attackerId);
             } else {
               state.setState("health", newHealth);
               state.setState("impact", true);
@@ -254,22 +242,17 @@ export const Controller = ({ state, joystick, userPlayer, onKilled, ...props }) 
 const PlayerInfo = ({ state }) => {
   const health = state.health;
   const name = state.profile.name;
-
   return (
     <Billboard position-y={2.7}>
-      <Text position-y={-0.3} fontSize={0.2}>
+      <Text position-y={0.3} fontSize={0.2}>
         {name}
         <meshBasicMaterial color="black" />
       </Text>
-      <mesh position-z={-0.001} position-y={-0.46}>
+      <mesh position-z={-0.001} position-y={0.16}>
         <planeGeometry args={[1, 0.07]} />
         <meshBasicMaterial color="black" transparent opacity={0.5} />
       </mesh>
-      <mesh
-        scale-x={health / 100}
-        position-x={-0.5 * (1 - health / 100)}
-        position-y={-0.46}
-      >
+      <mesh scale-x={health / 100} position-x={-0.5 * (1 - health / 100)} position-y={0.16}>
         <planeGeometry args={[1, 0.07]} />
         <meshBasicMaterial color="red" />
       </mesh>
